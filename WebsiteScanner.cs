@@ -16,19 +16,20 @@ namespace WebpageScanner
         public static CancellationToken CancelToken;
 
         private string _logPath;
-        private string _baseUrl; 
+        private string _baseUrl;
+        private string _website;
 
 
         private List<LogMessage> logMessages = new List<LogMessage>();
 
         private List<WebpageItem> webpageList = new List<WebpageItem>();
 
-        public WebsiteScanner( string outputDirectory)
+        public WebsiteScanner(string website,  string outputDirectory)
         {
 
             CancelToken = new CancellationToken();
             _logPath = outputDirectory;
-            
+            _website = website;
         }
 
         private string GetBasePath(string baseUrl)
@@ -82,10 +83,16 @@ namespace WebpageScanner
                         // take only pages which contain base url
                         foreach (string uriString in allOtherUrls)
                         {
-
-                            if (!webpageList.Any(x=>x.Url==uriString) && uriString.Contains(_baseUrl))
+                            Uri uriResult;
+                            string fqUrl= uriString;
+                            bool result = Uri.TryCreate(uriString, UriKind.Absolute, out uriResult);
+                            if (result == false && !uriString.Contains(_website))
                             {
-                                await DownloadUrlsAsync(uriString);
+                                fqUrl = _website + uriString;
+                            }
+                            if (!webpageList.Any(x=>x.Url== fqUrl) && fqUrl.Contains(_baseUrl))
+                            {
+                                await DownloadUrlsAsync(fqUrl);
                             }
                         }
                         
@@ -167,13 +174,13 @@ namespace WebpageScanner
             }
         }
 
-        public async void ScanAndDownLoadAsync(string url)
+        public async void ScanAndDownLoadAsync()
         {
             // set baseurl
-            _baseUrl = GetBasePath(url);
+            _baseUrl = GetBasePath(_website);
 
             // Async call to download the URL provided
-            await DownloadUrlsAsync(url);
+            await DownloadUrlsAsync(_website);
 
             // start logger
             StartLogger();

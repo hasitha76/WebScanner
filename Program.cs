@@ -14,15 +14,11 @@ namespace WebpageScanner
             //output location
             var outputDirectory = ConfigurationManager.AppSettings.Get("outputdirectory");
 
-
-
-            //var maxConcurrent = StrToIntDef(maxConcurrentStr, 10);
-
-            //Create a webpage downloader with 100 download threads
-            var scanner = new WebsiteScanner(outputDirectory);
+            //Create a webpage downloader 
+            var scanner = new WebsiteScanner(websiteUrl,outputDirectory);
 
             //scan and download the content of all links
-            scanner.ScanAndDownLoadAsync(websiteUrl);
+            scanner.ScanAndDownLoadAsync();
 
             Console.ReadKey();
 
